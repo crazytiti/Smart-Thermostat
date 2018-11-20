@@ -1,0 +1,22 @@
+thermostat DIY qui utilise le jus du relais ouvert pour charger un 18650
+avec un ESP8266 + mini écran
+en wifi
+stock les data sur le raspberry "EDF" ?
+mise à l'heure auto quand on accede à la config
+
+BDD :
+table / champs
+
+config	/	mode (M, P, O)
+			T_manuelle
+			N_planning
+			
+temp	/ 	timestamp
+			t	en °c
+			
+planning/	N_planning
+			Jour (0à6)
+			T0 (temp de minuit à H1)
+			H1 (1er heure)
+			T1 (température à partir de H1)
+			... H10 T10 (T10 judqu'a minuit)
