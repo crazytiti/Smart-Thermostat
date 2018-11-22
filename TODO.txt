@@ -8,15 +8,17 @@ BDD :
 table / champs
 
 config	/	mode (M, P, O)
-			T_manuelle
-			N_planning
+		T_manuelle
+		N_planning
+		calibration
+		hystérésis
 			
 temp	/ 	timestamp
-			t	en °c
+		t	en °c
 			
 planning/	N_planning
-			Jour (0à6)
-			T0 (temp de minuit à H1)
-			H1 (1er heure)
-			T1 (température à partir de H1)
-			... H10 T10 (T10 judqu'a minuit)
+		Jour (0à6)
+		T0 (temp de minuit à H1)
+		H1 (1er heure)
+		T1 (température à partir de H1)
+		... H10 T10 (T10 judqu'a minuit)
