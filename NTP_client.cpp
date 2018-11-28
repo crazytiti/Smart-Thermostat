@@ -54,7 +54,7 @@ unsigned long get_timestamp(void)
     const unsigned long seventyYears = 2208988800UL;
     // subtract seventy years:
     unsigned long epoch = secsSince1900 - seventyYears;
-    epoch += 3600;  //GMT +1
+    epoch += TimeCorrection; 
     setTime(epoch);
     return (epoch);
   }
@@ -88,7 +88,7 @@ void get_time(char* timenow)
     const unsigned long seventyYears = 2208988800UL;
     // subtract seventy years:
     unsigned long epoch = secsSince1900 - seventyYears;
-    epoch += 3600;  //GMT +1
+    epoch += TimeCorrection;
     setTime(epoch);
     sprintf(timenow,"%d %02d %02d %02d %02d %02d", year(), month() , day(), hour(), minute(), second());
   }

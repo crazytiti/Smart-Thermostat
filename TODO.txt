@@ -1,7 +1,7 @@
 thermostat DIY qui utilise le jus du relais ouvert pour charger un 18650
 avec un ESP8266 + mini écran
 en wifi
-stock les data sur le raspberry "EDF" ?
+stock les data sur le raspberry "EDF" 
 mise à l'heure auto quand on accede à la config
 
 BDD :
@@ -14,7 +14,8 @@ config	/	mode (M, P, O)
 		hystérésis
 			
 temp	/ 	timestamp
-		t	en °c
+		temp	en °c
+		consigne en °c
 			
 planning/	N_planning
 		Jour (0à6)
