@@ -19,11 +19,14 @@ DallasTemperature sensors(&oneWire);
 unsigned long last_capture=0;
 HTTPClient http;
 Horo3231 myHoro3231;
+int wifiOk;
 
 void setup(void)
 {
   char timenow[20];
   String time3231;
+  int GetTimeTentatives = 5;
+  byte DSsecond, DSminute, DShour, DSdayOfWeek, DSdayOfMonth, DSmonth, DSyear;
   // start serial port
   Serial.begin(115200);
   Serial.println("Smart Thermostat");
@@ -31,16 +34,30 @@ void setup(void)
   // Start up the library
   sensors.begin();
   // WIFI
-  init_wifi();
+  wifiOk = 1 - init_wifi();
   //serveur de temps
   init_NTP();
   //--recupere l'heure actuel
   timenow[0] = ' ';
-  while(timenow[0] == ' '){
-    get_time(timenow);
+  if(wifiOk){
+    Serial.println("Getting time");
+    while(timenow[0] == ' ' && GetTimeTentatives > 0){
+      get_time(timenow);
+      delay(100);
+      GetTimeTentatives--;
+    }  
   }
   Wire.begin(I2C_SDA, I2C_SCL);
   myHoro3231.SetByte(0x0F, 0x8);
+  if(timenow[0] != ' '){
+    Serial.println("Time OK");
+    myHoro3231.setDS3231time(second(), minute(), hour(), weekday(), day(), month(), year()- 2000);    //setting time for DS3231
+  }
+  else{
+    Serial.println("Time using DS3231");
+    myHoro3231.readDS3231time(&DSsecond, &DSminute, &DShour, &DSdayOfWeek, &DSdayOfMonth, &DSmonth, &DSyear);
+    setTime(DShour, DSminute, DSsecond, DSdayOfMonth, DSmonth, 2000 + DSyear);
+  }
   Serial.println("Horo3132: ");
   myHoro3231.displayTime();
   
@@ -55,7 +72,7 @@ void loop(void)
   unsigned long timestamp;
   float current_temp;
   //------------capture 1 temperature ----------------
-  sprintf(timenow,"%d %02d %02d %02d %02d %02d", year(), month() , day(), hour(), minute(), second());
+  sprintf(timenow,"%d %02d %02d J:%02d %02d %02d %02d", year(), month() , day(), weekday(), hour(), minute(), second());
   Serial.println(timenow);
   timestamp = now();
   Serial.println(timestamp);
