@@ -7,6 +7,7 @@
 #include "wifi.h"
 #include "NTP_client.h"
 #include "DallasTemperature.h"
+#include "Horo3231.h"
 #include "settings.h"
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
@@ -17,10 +18,12 @@ DallasTemperature sensors(&oneWire);
 
 unsigned long last_capture=0;
 HTTPClient http;
+Horo3231 myHoro3231;
 
 void setup(void)
 {
   char timenow[20];
+  String time3231;
   // start serial port
   Serial.begin(115200);
   Serial.println("Smart Thermostat");
@@ -36,6 +39,11 @@ void setup(void)
   while(timenow[0] == ' '){
     get_time(timenow);
   }
+  Wire.begin(I2C_SDA, I2C_SCL);
+  myHoro3231.SetByte(0x0F, 0x8);
+  Serial.println("Horo3132: ");
+  myHoro3231.displayTime();
+  
   last_capture = now() - interval;
 }
 
@@ -51,6 +59,8 @@ void loop(void)
   Serial.println(timenow);
   timestamp = now();
   Serial.println(timestamp);
+  Serial.println("Horo3132: ");
+  myHoro3231.displayTime();
   // call sensors.requestTemperatures() to issue a global temperature 
   // request to all devices on the bus
   Serial.print("Requesting temperatures...");
