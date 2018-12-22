@@ -9,6 +9,8 @@
 #include "DallasTemperature.h"
 #include "Horo3231.h"
 #include "settings.h"
+#include "TM1637Display.h"
+#include "functions.h"
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 OneWire oneWire(ONE_WIRE_BUS);
@@ -17,9 +19,37 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
 unsigned long last_capture=0;
+uint8_t TMconsigne[1] = {0b01011000};
+uint8_t TMcel[1] = {0b01100011};
+uint8_t TMcel1[1] = {0b00100011};
+uint8_t TMcel2[1] = {0b01000011};
+uint8_t TMcel3[1] = {0b01100010};
+uint8_t TMcel4[1] = {0b01100001};
 HTTPClient http;
 Horo3231 myHoro3231;
+TM1637Display tm1637(tm1637_CLK, tm1637_DIO);
 int wifiOk;
+int temp_heure;
+
+void animlogo(TM1637Display tm1637, int tempo){
+  tm1637.setSegments(TMcel1, 1, 3);   //display 'c'
+  delay(tempo);
+  tm1637.setSegments(TMcel2, 1, 3);   //display 'c'
+  delay(tempo);
+  tm1637.setSegments(TMcel3, 1, 3);   //display 'c'
+  delay(tempo);
+  tm1637.setSegments(TMcel4, 1, 3);   //display 'c'
+  delay(tempo);
+  tm1637.setSegments(TMcel1, 1, 3);   //display 'c'
+  delay(tempo);
+  tm1637.setSegments(TMcel2, 1, 3);   //display 'c'
+  delay(tempo);
+  tm1637.setSegments(TMcel3, 1, 3);   //display 'c'
+  delay(tempo);
+  tm1637.setSegments(TMcel4, 1, 3);   //display 'c'
+  delay(tempo);
+  tm1637.setSegments(TMcel, 1, 3);   //display 'c'
+}
 
 void setup(void)
 {
@@ -27,11 +57,17 @@ void setup(void)
   String time3231;
   int GetTimeTentatives = 5;
   byte DSsecond, DSminute, DShour, DSdayOfWeek, DSdayOfMonth, DSmonth, DSyear;
+  temp_heure = 0;
   // start serial port
   Serial.begin(115200);
   Serial.println("Smart Thermostat");
   pinMode(LED, OUTPUT);
-  // Start up the library
+  // LCD
+  tm1637.setBrightness(0x07);
+  tm1637.clear();
+  tm1637.showNumberDecEx(888, 0b01000000, false, 3, 0);  
+  tm1637.setSegments(TMcel, 1, 3);   //display 'c'
+  // Start up the library DS1820
   sensors.begin();
   // WIFI
   wifiOk = 1 - init_wifi();
@@ -89,6 +125,24 @@ void loop(void)
   current_temp = sensors.getTempCByIndex(0);
   Serial.print("Temperature for the device 1 is: ");
   Serial.println(current_temp); 
+  if(temp_heure){   //affiche la température ou l'heure
+    tm1637.showNumberDecEx(current_temp*10, 0b01000000, false, 3, 0);  
+    tm1637.setSegments(TMcel, 1, 3);   //display 'c'
+    animlogo(tm1637, 100);  
+    temp_heure = 1 - temp_heure;
+  }
+  else{
+    tm1637.showNumberDecEx(hour(), 0b00000000, true, 2, 0);  
+    tm1637.showNumberDecEx(minute(), 0b00000000, true, 2, 2);  
+    delay(500);
+    tm1637.showNumberDecEx(hour(), 0b01000000, true, 2, 0);  
+    delay(500);
+    tm1637.showNumberDecEx(hour(), 0b00000000, true, 2, 0);  
+    delay(500);
+    tm1637.showNumberDecEx(hour(), 0b01000000, true, 2, 0);  
+    delay(500);
+    temp_heure = 1 - temp_heure;
+  }
  //----------------envoi sur SQLITE--------------------
  if(last_capture < (now() - interval)){
     last_capture = now();

@@ -6,6 +6,9 @@
 #define ButtonPlus  13
 #define ButtonMoins 15
 #define LED 14
+#define Heater  14
+#define tm1637_CLK  0
+#define tm1637_DIO  2
 #define interval 59  //interval entre 2 enregistrement en BDD en sec
 #define bdd_adr "http://192.168.4.35/thermostat/"
 #define DS3231_I2C_ADDRESS 0x68
