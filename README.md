@@ -19,5 +19,8 @@ Have an household smart thermostat :
 - web access and config
 - Wall mounted device that show actual temp, time and can change mode and temperature setpoint.
 
+The serveur folder contain basic web code.
+The serveur/smart folder contain the full Open Element project
+
 ![picture](https://raw.githubusercontent.com/crazytiti/Smart-Thermostat/master/proto.jpg)
 
