@@ -54,7 +54,7 @@
           'chartType': 'LineChart',
           'containerId': 'chart_div',
           'options': {
-                             title: 'Consommation Instantanée :',
+                             title: 'Température actuelle : <?php echo getActualTemp (); ?>°c. Historique :',
                              height : 400,
                              backgroundColor: '#FFF',
                              colors : ['#375D81', '#ABC8E2'],
