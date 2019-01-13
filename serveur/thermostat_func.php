@@ -23,19 +23,22 @@
   //
   //	genere le tableau d'historique de température
   //
-  function getTempGraph ($nb_days) {
+  function getTempGraph ($date_debut, $date_fin) {
     global $sqlite;
 	$nb_point = 1500;	//nombre de point du graphe
     $now  = time();
-    $past = strtotime("-$nb_days day", $now);
+    $past = strtotime($date_debut);
+	$past = $past + 3600;
+	$present = strtotime($date_fin);
+	$present = $present + 3600;
 
     $db = new SQLite3($sqlite);
-	$results = $db->querySingle("SELECT count(timestamp) FROM temp WHERE timestamp > $past ORDER BY timestamp ASC;");
+	$results = $db->querySingle("SELECT count(timestamp) FROM temp WHERE timestamp > $past AND timestamp < $present ORDER BY timestamp ASC;");
 	$numRows = $results;
 	$modulo_nb_point = $nb_point / $numRows;
 	$nb_point_effectif = 1;
 	$num_point = 0;
-	$results = $db->query("SELECT (timestamp -3600) as timestamp, temp, consigne FROM temp WHERE timestamp > $past ORDER BY timestamp ASC;");
+	$results = $db->query("SELECT (timestamp -3600) as timestamp, temp, consigne FROM temp WHERE timestamp > $past AND timestamp < $present ORDER BY timestamp ASC;");
 	$data = array();
 	while($row = $results->fetchArray(SQLITE3_ASSOC)){
 		//modulo pour faire "sauter" des points
