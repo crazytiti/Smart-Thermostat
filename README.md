@@ -2,13 +2,13 @@
 Smart home thermostat with graphics and fully 7-days programs 
 
 Hardware :
-ESP8266
-RaspberryPi with Apache, PHP7, SQLITE
-DS1820 temperature sensor
-4 digit LCD with TM1637
-battery saved clock DS3231
-Some arduino/220V relay
-Push buttons
+- ESP8266
+- RaspberryPi with Apache, PHP7, SQLITE
+- DS1820 temperature sensor
+- 4 digit LCD with TM1637
+- battery saved clock DS3231
+- Some arduino/220V relay
+- Push buttons
 
 Goal : 
 Have an household smart thermostat :
