@@ -96,17 +96,23 @@
   function setconfig($champ, $value) {
 	global $sqlite;
     $db = new SQLite3($sqlite); 
-	$db->exec('INSERT OR IGNORE INTO config (config_key, ' . $champ . ') Values (1, "' . $value . '"); UPDATE config set ' . $champ . ' = "' . $value . '" WHERE config_key = 1;'); 
+	$db->exec('INSERT OR IGNORE INTO config (config_key, ' . $champ . ') Values (1, "' . $value . '"); UPDATE config SET ' . $champ . ' = "' . $value . '" WHERE config_key = 1;'); 
 	return 1;
 	}
   
   //
-  //	page de configuration du planning
+  //	page de configuration du planning : enregistrement d'un jour
   //
-  function configPlanning ($temp, $consigne, $timestamp) {
+  function configPlanning ($N_planning, $Jour, $H0, $T0, $H1, $T1, $H2, $T2, $H3, $T3, $H4, $T4, $H5, $T5
+	, $H6, $T6, $H7, $T7, $H8, $T8, $H9, $T9) {
     global $sqlite;
     $db = new SQLite3($sqlite);
-    $db->exec('CREATE TABLE IF NOT EXISTS planning (N_planning INTEGER, nom TEXT, Jour INTEGER, H0 DATE, T0 FLOAT, H1 DATE, T1 FLOAT, H2 DATE, T2 FLOAT, H3 DATE, T3 FLOAT, H4 DATE, T4 FLOAT, H5 DATE, T5 FLOAT, H6 DATE, T6 FLOAT, H7 DATE, T7 FLOAT, H8 DATE, T8 FLOAT, H9 DATE, T9 FLOAT, H10 DATE, T10 FLOAT, UNIQUE(N_planning, Jour) );'); // cree la table planning si elle n'existe pas
+    $db->exec('CREATE TABLE IF NOT EXISTS planning (N_planning INTEGER, nom TEXT, Jour INTEGER, H0 DATE, T0 FLOAT, H1 DATE, T1 FLOAT, H2 DATE, T2 FLOAT, H3 DATE, T3 FLOAT, H4 DATE, T4 FLOAT, H5 DATE, T5 FLOAT, H6 DATE, T6 FLOAT, H7 DATE, T7 FLOAT, H8 DATE, T8 FLOAT, H9 DATE, T9 FLOAT, UNIQUE(N_planning, Jour) );'); // cree la table planning si elle n'existe pas
+	$db->exec('INSERT OR IGNORE INTO planning (N_planning, Jour, H0, T0, H1, T1, H2, T2, H3, T3, H4, T4, H5, T5, H6, T6, H7, T7, H8, T8, H9, T9) 
+	Values (' .$N_planning. ', "' . $Jour . '", "' .$H0. '", "' . $T0 . '", "' .$H1. '", "' . $T1 . '", "' .$H2. '", "' . $T2 . '", "' .$H3. '", "' . $T3 . '", "' .$H4. '", "' . $T4 . '", "' .$H5. '", "' . $T5 . '", "' .$H6. '", "' . $T6 . '", "' .$H7. '", "' . $T7 . '", "' .$H8. '", "' . $T8 . '", "' .$H9. '", "' . $T9 . '"); 
+	UPDATE planning SET H0 = "' . $H0 . '", T0 = "' . $T0 . '", H1 = "' . $H1 . '", T1 = "' . $T1 . '", H2 = "' . $H2 . '", T2 = "' . $T2 . '", H3 = "' . $H3 . '", T3 = "' . $T3 . '", H4 = "' . $H4 . '", T4 = "' . $T4 . '", H5 = "' . $H5 . '", T5 = "' . $T5 . '", H6 = "' . $H6 . '", T6 = "' . $T6 . '", H7 = "' . $H7 . '", T7 = "' . $T7 . '", H8 = "' . $H8 . '", T8 = "' . $T8 . '", H9 = "' . $H9 . '", T9 = "' . $T9 . '"  
+	WHERE N_planning = ' .$N_planning. ' AND Jour = "' . $Jour . '";'); 	
+	return 1;	
   }
   
   //
