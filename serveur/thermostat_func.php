@@ -116,11 +116,14 @@
   }
   
   //
-  //	renvoie le planning à l'ESP en fonction du planning selectionné
+  //	renvoie le planning d'un jour en fonction du planning selectionné
   //
-  function returnConfig ($temp, $consigne, $timestamp) {
+  function getPlanningDay ($Jour, $N_planning) {
     global $sqlite;
     $db = new SQLite3($sqlite);
-
+	$db->exec('CREATE TABLE IF NOT EXISTS planning (N_planning INTEGER, nom TEXT, Jour INTEGER, H0 DATE, T0 FLOAT, H1 DATE, T1 FLOAT, H2 DATE, T2 FLOAT, H3 DATE, T3 FLOAT, H4 DATE, T4 FLOAT, H5 DATE, T5 FLOAT, H6 DATE, T6 FLOAT, H7 DATE, T7 FLOAT, H8 DATE, T8 FLOAT, H9 DATE, T9 FLOAT, UNIQUE(N_planning, Jour) );'); // cree la table planning si elle n'existe pas
+	$results = $db->query("select * from planning WHERE N_planning = " . $N_planning . " AND Jour = " . $Jour . " ;");
+	$row = $results->fetchArray(SQLITE3_ASSOC);
+    return $row; 
   }
 ?>
