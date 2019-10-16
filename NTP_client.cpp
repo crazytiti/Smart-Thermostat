@@ -6,7 +6,9 @@ unsigned int localPort = 2390;      // local port to listen for UDP packets
  *  Lookup the IP address for the host name instead */
 //IPAddress timeServer(129, 6, 15, 28); // time.nist.gov NTP server
 IPAddress timeServerIP; // time.nist.gov NTP server address
+//const char* ntpServerName = "nist1.datum.com";
 const char* ntpServerName = "time.nist.gov";
+const int waitTime = 1500;
 
 const int NTP_PACKET_SIZE = 48; // NTP time stamp is in the first 48 bytes of the message
 
@@ -22,18 +24,18 @@ void init_NTP()
   udp.begin(localPort);
   Serial.print("Local port: ");
   Serial.println(udp.localPort());
-  get_time(test_time);
+  get_time(test_time, 0);
+  Serial.print("GMT time: ");
   Serial.println(test_time);
 }
 
-unsigned long get_timestamp(void)
+unsigned long get_timestamp(int TimeCorrection)
 {
   //get a random server from the pool
   WiFi.hostByName(ntpServerName, timeServerIP); 
-
   sendNTPpacket(timeServerIP); // send an NTP packet to a time server
   // wait to see if a reply is available
-  delay(1000);
+  delay(waitTime);
   
   int cb = udp.parsePacket();
   if (!cb) {
@@ -60,18 +62,22 @@ unsigned long get_timestamp(void)
   }
 }
 
-void get_time(char* timenow)
+void get_time(char* timenow, int TimeCorrection)
 {
   //get a random server from the pool
   WiFi.hostByName(ntpServerName, timeServerIP); 
-
+  
+  Serial.print("IP ntpserver : ");
+  Serial.println(timeServerIP);
+  
   sendNTPpacket(timeServerIP); // send an NTP packet to a time server
   // wait to see if a reply is available
-  delay(1000);
+  delay(waitTime);
   
-  int cb = udp.parsePacket();
+  int cb = udp.parsePacket();  
   if (!cb) {
     sprintf(timenow," ");
+    Serial.print("No response");
   }
   else {
     // We've received a packet, read the data from it
@@ -102,6 +108,7 @@ unsigned long sendNTPpacket(IPAddress& address)
   // Initialize values needed to form NTP request
   // (see URL above for details on the packets)
   packetBuffer[0] = 0b11100011;   // LI, Version, Mode
+  //packetBuffer[0] = 0b11011011;   // LI, Version, Mode
   packetBuffer[1] = 0;     // Stratum, or type of clock
   packetBuffer[2] = 6;     // Polling Interval
   packetBuffer[3] = 0xEC;  // Peer Clock Precision
