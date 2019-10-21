@@ -5,8 +5,8 @@
 #define I2C_SCL 5
 #define ButtonPlus  13
 #define ButtonMoins 15
-#define ButtonMode  3
-#define LED 14
+//#define ButtonMode  3
+#define LED 3
 #define Heater  14
 #define tm1637_CLK  0
 #define tm1637_DIO  2

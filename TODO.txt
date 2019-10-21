@@ -7,19 +7,43 @@ mise à l'heure auto quand on accede à la config
 BDD :
 table / champs
 
-config	/	mode (M, P, O)
-		T_manuelle
+config	/	config_key (clef unique)
+		mode (M, P, O)
+		T_manuelle	(pas utilisé)
 		N_planning
 		calibration
-		hystérésis
+		hysteresis
+		fuseau
+		rechargement
 			
 temp	/ 	timestamp
 		temp	en °c
 		consigne en °c
 			
 planning/	N_planning
-		Jour (0à6)
-		T0 (temp de minuit à H1)
-		H1 (1er heure)
-		T1 (température à partir de H1)
-		... H10 T10 (T10 judqu'a minuit)
+		nom
+		Jour (1à7, 1=dimanche)
+		T0 (temp de minuit à H0)
+		H0 (1er heure)
+		T1 (température à partir de H0 jusqu'a H1)
+		... T9 H9 (T9 jusqu'a minuit, H9 ne sert a rien)
+
+
+//------------------- DEV ---------
+a tester - mettre une reconnexion auto si le wifi est NOK
+OK - mettre une sécurité 25°c maxi
+- faire les boutons en interruption
+OK - fonction thermostat auto/manuel/OFF
+OK - charger les valeurs (config) en eeprom si le raspPi est non dispo
+OK - charger les valeurs (planning) en eeprom si le raspPi est non dispo
+OK - faire un boolean dans la BDD pour indiquer un changement de config à recharger sur l'esp
+OK - tester/revoir le fonctionnement du fuseau sauvegarder en eeprom
+OK - tester le fonctionnement de l'horo3231
+- tester fonctionnement sans wifi
+- proteger par mot de passe l'accés aux paramètres
+- enlever le bouton mode ?
+- afficher la valeur de consigne lors d'un appuis bouton
+
+
+//------------------- MODE D'EMPLOI ---------
+la programmation web permet de bloquer en mode manuel sinon l'appuis sur un bouton de température bascule en mode manuel pour une heure

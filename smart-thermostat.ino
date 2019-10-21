@@ -22,6 +22,7 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
 unsigned long last_capture = 0;
+unsigned long manual_mode_time = 0;
 int TimeCorrection = 7200;
 uint8_t TMconsigne[1] = {0b01011000};
 uint8_t TMcel[1] = {0b01100011};
@@ -36,7 +37,7 @@ int wifiOk;
 int temp_heure;     // boolean d'affichage lcd
 int reload_config;  // boolean de changement de config
 //-----variables de gestion thermostat---------
-int th_mode = 79;          //mode : M : manuel, P : planning, O : off
+int th_mode = 'M';          //mode : M : manuel, P : planning, O : off
 int N_planning = 0;     //N de planning actif
 int th_planning[7][20];  //7 jours de la semaine contiennent 10 couples température(à diviser par 10) / horaire(en minute depuis minuit)
 float th_calibration;  //calibration sonde de t°
@@ -75,17 +76,17 @@ void animlogo(TM1637Display tm1637, int tempo) {
 
 void btPlus() {
   th_consigne += 0.1;
-  th_mode = 'M';
   Serial.print("Passage en mode manuel, consigne : ");
   Serial.println(th_consigne);
+  manual_mode_time = now();
   delay(300);
 }
 
 void btMoins() {
   th_consigne -= 0.1;
-  th_mode = 'M';
   Serial.print("Passage en mode manuel, consigne : ");
   Serial.println(th_consigne);
+  manual_mode_time = now();
   delay(300);
 }
 
@@ -180,7 +181,7 @@ int get_config_float(String champ, HTTPClient *http, float* retvalue) {
 }
 
 //recupere un jour et le stock dans la structure
-int get_planning(byte numero_jour, struct Jour jour, HTTPClient *http) {
+int get_planning(byte numero_jour, struct Jour& jour, HTTPClient *http) {
   String tempstr;
   Serial.println("Get planning DB---------------------------------------");
   tempstr =  "thermostat_get_planning.php?jour=";
@@ -207,7 +208,7 @@ int get_planning(byte numero_jour, struct Jour jour, HTTPClient *http) {
         Serial.print(jour.horaire[j - 3].minutes);
         Serial.print('t');
         get_champ(payload, tempstr);
-        switch (tempstr.length()) {   //conversion en float suivant el nomrbe de char (ne marche que de 0 à 99.9, 1 décimal max)
+        switch (tempstr.length()) {   //conversion en float suivant le nombre de char (ne marche que de 0 à 99.9, 1 décimal max)
           case 2:
             jour.horaire[j - 3].temp = tempstr[1] - 48;
             break;
@@ -260,12 +261,16 @@ void setup(void)
 
   attachInterrupt(digitalPinToInterrupt(ButtonPlus), btPlus, FALLING);
   attachInterrupt(digitalPinToInterrupt(ButtonMoins), btMoins, FALLING);
-  attachInterrupt(digitalPinToInterrupt(ButtonMode), btMode, FALLING);
+  //  attachInterrupt(digitalPinToInterrupt(ButtonMode), btMode, FALLING);
   temp_heure = 0;
   // start serial port
   Serial.begin(115200);
+  Serial.println();
   Serial.println("Smart Thermostat");
   pinMode(LED, OUTPUT);
+  pinMode(Heater, OUTPUT);
+  //pinMode(ButtonPlus, INPUT);
+  //pinMode(ButtonMoins, INPUT);
   // LCD
   tm1637.setBrightness(0x07);
   tm1637.clear();
@@ -275,8 +280,8 @@ void setup(void)
   sensors.begin();
   // WIFI
   wifiOk = 1 - init_wifi();
-  // récupération config en BDD
-  EEPROM.begin(512);            //alloue en ram l'espace nécésaire aux actions d'eeprom
+  //-----------------  récupération config en BDD ---------------------------
+  EEPROM.begin(1024);            //alloue en ram l'espace nécésaire aux actions d'eeprom
   retourhttp = get_config_int("fuseau", &http, &TimeCorrection);
   if (retourhttp == 200) { //sauvegarde en eeprom
     EEPROM.put(adr_eeprom, TimeCorrection);
@@ -331,15 +336,33 @@ void setup(void)
   adr_eeprom += sizeof(float);
 
   for (int i = 1; i < 8; i++) {
-    retourhttp = get_planning(i, Planning[i], &http);
+    retourhttp = get_planning(i, Planning[i - 1], &http);
     if (retourhttp == 200) { //sauvegarde en eeprom
-
+      EEPROM.put(adr_eeprom, Planning[i - 1]);
+      Serial.print("adr: ");
+      Serial.println(adr_eeprom);
+      EEPROM.commit();
+      delay(20);
     }
     else { //restaure eeprom
-
+      EEPROM.get(adr_eeprom, Planning[i - 1]);
     }
+    adr_eeprom += sizeof(Planning[i - 1]);
   }
 
+  //----------------- affichage des settings ---------------------------
+  Serial.println("Planning: ");
+  for (int i = 0; i < 7; i++) {
+    for (int j = 0; j < 10; j++) {
+      Serial.print(Planning[i].horaire[j].temp);
+      Serial.print("°c ");
+      Serial.print(Planning[i].horaire[j].heures);
+      Serial.print("h");
+      Serial.print(Planning[i].horaire[j].minutes);
+      Serial.print(" ");
+    }
+    Serial.println(" ");
+  }
   Serial.print("fuseau: ");
   Serial.println(TimeCorrection);
   Serial.print("th_mode: ");
@@ -407,8 +430,8 @@ void loop(void)
   current_temp = sensors.getTempCByIndex(0);
   Serial.print("Temperature for the device 1 is: ");
   Serial.println(current_temp);
-  Serial.print("Consigne: ");
   th_consigne = get_consigne();
+  Serial.print("Consigne: ");
   Serial.println(th_consigne);
   if (temp_heure) { //affiche la température ou l'heure
     tm1637.showNumberDecEx(current_temp * 10, 0b01000000, false, 3, 0);
@@ -482,6 +505,11 @@ void loop(void)
 }
 //----------------fonction thermostat-----------------
 int set_heater(float current_temp) {
+  if (th_mode == 'O') {
+    digitalWrite(Heater, 0);
+    Serial.println("OFF");
+    return 0;
+  }
   if (digitalRead(Heater)) {
     if (th_consigne > (current_temp - th_hysteresis)) {
       digitalWrite(Heater, 1);
@@ -506,10 +534,34 @@ int set_heater(float current_temp) {
       return 0;
     }
   }
-
   return 0;
 }
 
 float get_consigne(void) {
-  return 22.0;
+  float consigne = 18;
+  int today = dayofweek(now());
+  Serial.print("Day of week: ");
+  Serial.println(today);
+  if (manual_mode_time > (now() - 3600)) {
+    consigne = th_consigne;
+    Serial.println("manual mode");
+  }
+  else {
+    Serial.println("planning mode");
+    // parcours décrémental des horaires de planning du jour pour trouver la plage horaire actuellement valide
+    for (int i = 9; i > -1; i--) {
+      if (hour() < Planning[today].horaire[i].heures) {
+        consigne = Planning[today].horaire[i].temp;
+      }
+      if (hour() == Planning[today].horaire[i].heures) {
+        if (minute() < Planning[today].horaire[i].minutes) {
+          consigne = Planning[today].horaire[i].temp;
+        }
+      }
+    }
+  }
+  if (consigne > 25) {
+    consigne = 25.0;
+  }
+  return consigne;
 }
