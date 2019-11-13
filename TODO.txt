@@ -39,9 +39,9 @@ OK - charger les valeurs (planning) en eeprom si le raspPi est non dispo
 OK - faire un boolean dans la BDD pour indiquer un changement de config à recharger sur l'esp
 OK - tester/revoir le fonctionnement du fuseau sauvegarder en eeprom
 OK - tester le fonctionnement de l'horo3231
-- tester fonctionnement sans wifi
+OK - tester fonctionnement sans wifi
 - proteger par mot de passe l'accés aux paramètres
-- enlever le bouton mode ?
+- garder le bouton mode ?
 - afficher la valeur de consigne lors d'un appuis bouton
 
 

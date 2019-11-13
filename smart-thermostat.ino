@@ -38,6 +38,7 @@ int temp_heure;     // boolean d'affichage lcd
 int reload_config;  // boolean de changement de config
 //-----variables de gestion thermostat---------
 int th_mode = 'M';          //mode : M : manuel, P : planning, O : off
+int bt_interrupt = 0;   //flag appuis sur boutons
 int N_planning = 0;     //N de planning actif
 int th_planning[7][20];  //7 jours de la semaine contiennent 10 couples température(à diviser par 10) / horaire(en minute depuis minuit)
 float th_calibration;  //calibration sonde de t°
@@ -74,20 +75,14 @@ void animlogo(TM1637Display tm1637, int tempo) {
   tm1637.setSegments(TMcel, 1, 3);   //display 'c'
 }
 
-void btPlus() {
-  th_consigne += 0.1;
-  Serial.print("Passage en mode manuel, consigne : ");
-  Serial.println(th_consigne);
-  manual_mode_time = now();
-  delay(300);
+static void btPlus() {  
+  noInterrupts();
+  bt_interrupt = 1;
 }
 
-void btMoins() {
-  th_consigne -= 0.1;
-  Serial.print("Passage en mode manuel, consigne : ");
-  Serial.println(th_consigne);
-  manual_mode_time = now();
-  delay(300);
+static void btMoins() {
+  noInterrupts();
+  bt_interrupt = 1;
 }
 
 void btMode() {
@@ -101,7 +96,7 @@ void btMode() {
   }
   Serial.print("Changement de mode : ");
   Serial.println(th_mode);
-  delay(300);
+//  delay(300);
 }
 
 int get_config_int(String champ, HTTPClient *http, int* value) {
@@ -269,8 +264,8 @@ void setup(void)
   Serial.println("Smart Thermostat");
   pinMode(LED, OUTPUT);
   pinMode(Heater, OUTPUT);
-  //pinMode(ButtonPlus, INPUT);
-  //pinMode(ButtonMoins, INPUT);
+  pinMode(ButtonPlus, INPUT);
+  pinMode(ButtonMoins, INPUT);
   // LCD
   tm1637.setBrightness(0x07);
   tm1637.clear();
@@ -430,12 +425,33 @@ void loop(void)
   current_temp = sensors.getTempCByIndex(0);
   Serial.print("Temperature for the device 1 is: ");
   Serial.println(current_temp);
+  if (bt_interrupt){
+    bt_interrupt=0;
+    while(digitalRead(ButtonPlus) == LOW){
+      th_consigne += 0.1;
+      Serial.print("Passage en mode manuel, consigne : ");
+      Serial.println(th_consigne);
+      tm1637.showNumberDecEx(th_consigne * 10, 0b01000000, false, 3, 0);
+      tm1637.setSegments(TMcel4, 1, 3);   //display 'c'
+      delay(450);
+    }
+    while(digitalRead(ButtonMoins) == LOW){
+      th_consigne -= 0.1;
+      Serial.print("Passage en mode manuel, consigne : ");
+      Serial.println(th_consigne);
+      tm1637.showNumberDecEx(th_consigne * 10, 0b01000000, false, 3, 0);
+      tm1637.setSegments(TMcel4, 1, 3);   //display 'c'
+      delay(450);
+    }    
+    manual_mode_time = now();
+    interrupts();
+  }
   th_consigne = get_consigne();
   Serial.print("Consigne: ");
   Serial.println(th_consigne);
   if (temp_heure) { //affiche la température ou l'heure
     tm1637.showNumberDecEx(current_temp * 10, 0b01000000, false, 3, 0);
-    tm1637.setSegments(TMcel, 1, 3);   //display 'c'
+    tm1637.setSegments(TMcel, 1, 3);   //display '°'
     if (set_heater(current_temp)) {
       animlogo(tm1637, 100);
     }
@@ -506,30 +522,30 @@ void loop(void)
 //----------------fonction thermostat-----------------
 int set_heater(float current_temp) {
   if (th_mode == 'O') {
-    digitalWrite(Heater, 0);
+    digitalWrite(Heater, 1);
     Serial.println("OFF");
     return 0;
   }
   if (digitalRead(Heater)) {
     if (th_consigne > (current_temp - th_hysteresis)) {
-      digitalWrite(Heater, 1);
+      digitalWrite(Heater, 0);
       Serial.println("Heat");
       return 1;
     }
     else {
-      digitalWrite(Heater, 0);
+      digitalWrite(Heater, 1);
       Serial.println("Cool");
       return 0;
     }
   }
   else {
     if (th_consigne > (current_temp + th_hysteresis)) {
-      digitalWrite(Heater, 1);
+      digitalWrite(Heater, 0);
       Serial.println("Heat");
       return 1;
     }
     else {
-      digitalWrite(Heater, 0);
+      digitalWrite(Heater, 1);
       Serial.println("Cool");
       return 0;
     }
@@ -554,7 +570,7 @@ float get_consigne(void) {
         consigne = Planning[today].horaire[i].temp;
       }
       if (hour() == Planning[today].horaire[i].heures) {
-        if (minute() < Planning[today].horaire[i].minutes) {
+        if (minute() <= Planning[today].horaire[i].minutes) {
           consigne = Planning[today].horaire[i].temp;
         }
       }

@@ -4,10 +4,10 @@
 #define I2C_SDA 4
 #define I2C_SCL 5
 #define ButtonPlus  13
-#define ButtonMoins 15
+#define ButtonMoins 14
 //#define ButtonMode  3
-#define LED 3
-#define Heater  14
+#define LED 15
+#define Heater  3
 #define tm1637_CLK  0
 #define tm1637_DIO  2
 #define interval 59  //interval entre 2 enregistrement en BDD en sec
