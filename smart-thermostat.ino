@@ -75,7 +75,7 @@ void animlogo(TM1637Display tm1637, int tempo) {
   tm1637.setSegments(TMcel, 1, 3);   //display 'c'
 }
 
-static void btPlus() {  
+static void btPlus() {
   noInterrupts();
   bt_interrupt = 1;
 }
@@ -96,7 +96,7 @@ void btMode() {
   }
   Serial.print("Changement de mode : ");
   Serial.println(th_mode);
-//  delay(300);
+  //  delay(300);
 }
 
 int get_config_int(String champ, HTTPClient *http, int* value) {
@@ -275,6 +275,7 @@ void setup(void)
   sensors.begin();
   // WIFI
   wifiOk = 1 - init_wifi();
+  tm1637.showNumberDecEx(801, 0b01000000, false, 3, 0);
   //-----------------  récupération config en BDD ---------------------------
   EEPROM.begin(1024);            //alloue en ram l'espace nécésaire aux actions d'eeprom
   retourhttp = get_config_int("fuseau", &http, &TimeCorrection);
@@ -344,8 +345,8 @@ void setup(void)
     }
     adr_eeprom += sizeof(Planning[i - 1]);
   }
-
   //----------------- affichage des settings ---------------------------
+  tm1637.showNumberDecEx(802, 0b01000000, false, 3, 0);
   Serial.println("Planning: ");
   for (int i = 0; i < 7; i++) {
     for (int j = 0; j < 10; j++) {
@@ -369,9 +370,10 @@ void setup(void)
   Serial.print("hyst: ");
   Serial.println(th_hysteresis);
   th_consigne = 22.5;
+  //---------recupere l'heure actuel-------------
+  tm1637.showNumberDecEx(803, 0b01000000, false, 3, 0);
   //serveur de temps
   init_NTP();
-  //--recupere l'heure actuel
   timenow[0] = ' ';
   if (wifiOk) {
     Serial.println("Getting time");
@@ -425,9 +427,9 @@ void loop(void)
   current_temp = sensors.getTempCByIndex(0);
   Serial.print("Temperature for the device 1 is: ");
   Serial.println(current_temp);
-  if (bt_interrupt){
-    bt_interrupt=0;
-    while(digitalRead(ButtonPlus) == LOW){
+  if (bt_interrupt) {
+    bt_interrupt = 0;
+    while (digitalRead(ButtonPlus) == LOW) {
       th_consigne += 0.1;
       Serial.print("Passage en mode manuel, consigne : ");
       Serial.println(th_consigne);
@@ -435,14 +437,14 @@ void loop(void)
       tm1637.setSegments(TMcel4, 1, 3);   //display 'c'
       delay(450);
     }
-    while(digitalRead(ButtonMoins) == LOW){
+    while (digitalRead(ButtonMoins) == LOW) {
       th_consigne -= 0.1;
       Serial.print("Passage en mode manuel, consigne : ");
       Serial.println(th_consigne);
       tm1637.showNumberDecEx(th_consigne * 10, 0b01000000, false, 3, 0);
       tm1637.setSegments(TMcel4, 1, 3);   //display 'c'
       delay(450);
-    }    
+    }
     manual_mode_time = now();
     interrupts();
   }
@@ -526,8 +528,8 @@ int set_heater(float current_temp) {
     Serial.println("OFF");
     return 0;
   }
-  if (digitalRead(Heater)) {
-    if (th_consigne > (current_temp - th_hysteresis)) {
+  if (digitalRead(Heater)) {  //phase "cool"
+    if (th_consigne > (current_temp + th_hysteresis)) {
       digitalWrite(Heater, 0);
       Serial.println("Heat");
       return 1;
@@ -538,8 +540,8 @@ int set_heater(float current_temp) {
       return 0;
     }
   }
-  else {
-    if (th_consigne > (current_temp + th_hysteresis)) {
+  else {    //phase "heat"
+    if (th_consigne > (current_temp - th_hysteresis)) {
       digitalWrite(Heater, 0);
       Serial.println("Heat");
       return 1;

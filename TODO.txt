@@ -32,7 +32,7 @@ planning/	N_planning
 //------------------- DEV ---------
 a tester - mettre une reconnexion auto si le wifi est NOK
 OK - mettre une sécurité 25°c maxi
-- faire les boutons en interruption
+OK - faire les boutons en interruption
 OK - fonction thermostat auto/manuel/OFF
 OK - charger les valeurs (config) en eeprom si le raspPi est non dispo
 OK - charger les valeurs (planning) en eeprom si le raspPi est non dispo
@@ -41,9 +41,9 @@ OK - tester/revoir le fonctionnement du fuseau sauvegarder en eeprom
 OK - tester le fonctionnement de l'horo3231
 OK - tester fonctionnement sans wifi
 - proteger par mot de passe l'accés aux paramètres
-- garder le bouton mode ?
-- afficher la valeur de consigne lors d'un appuis bouton
-
+NOP - garder le bouton mode ?
+- faire le tri des pin avec les probs d'IO
+- vérifier le fct d'hysteresis
 
 //------------------- MODE D'EMPLOI ---------
 la programmation web permet de bloquer en mode manuel sinon l'appuis sur un bouton de température bascule en mode manuel pour une heure
