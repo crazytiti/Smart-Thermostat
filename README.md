@@ -22,6 +22,8 @@ Have an household smart thermostat :
 The serveur folder contain basic web code.
 The serveur/smart folder contain the full Open Element project
 
+![picture](https://raw.githubusercontent.com/crazytiti/Smart-Thermostat/master/sur%20mur.jpg)
+
 ![picture](https://raw.githubusercontent.com/crazytiti/Smart-Thermostat/master/capture-web.jpg)
 
 ![picture](https://raw.githubusercontent.com/crazytiti/Smart-Thermostat/master/planning.JPG)
@@ -34,4 +36,4 @@ The serveur/smart folder contain the full Open Element project
 
 ![picture](https://raw.githubusercontent.com/crazytiti/Smart-Thermostat/master/en_boite.jpg)
 
-![picture](https://raw.githubusercontent.com/crazytiti/Smart-Thermostat/master/sur%20mur.jpg)
+![picture](https://raw.githubusercontent.com/crazytiti/Smart-Thermostat/master/assemblage.jpg)
