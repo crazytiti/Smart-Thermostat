@@ -425,6 +425,7 @@ void loop(void)
   // After we got the temperatures, we can print them here.
   // We use the function ByIndex, and as an example get the temperature from the first sensor only.
   current_temp = sensors.getTempCByIndex(0);
+  current_temp += th_calibration;
   Serial.print("Temperature for the device 1 is: ");
   Serial.println(current_temp);
   if (bt_interrupt) {
