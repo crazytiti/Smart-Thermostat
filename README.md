@@ -19,7 +19,11 @@ Have an household smart thermostat :
 - web access and config
 - Wall mounted device that show actual temp, time and can change mode and temperature setpoint.
 
-The serveur folder contain basic web code.
+Tips for power : I use a DC-DC 220-5V to charge the li-ion. This converter is plug to the heater relay.
+When the heater (i have an oil boiler) is off a small current goes throught it and power the dc-dc.
+When the heater is on the thermostat run on li-ion (~100mA)
+
+The serveur folder contain basic/broken web code.
 The serveur/smart folder contain the full Open Element project
 
 ![picture](https://raw.githubusercontent.com/crazytiti/Smart-Thermostat/master/sur%20mur.jpg)
