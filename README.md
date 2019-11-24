@@ -34,4 +34,4 @@ The serveur/smart folder contain the full Open Element project
 
 ![picture](https://raw.githubusercontent.com/crazytiti/Smart-Thermostat/master/en_boite.jpg)
 
-![picture](https://raw.githubusercontent.com/crazytiti/Smart-Thermostat/master/sur mur.jpg)
+![picture]("https://raw.githubusercontent.com/crazytiti/Smart-Thermostat/master/sur mur.jpg")
