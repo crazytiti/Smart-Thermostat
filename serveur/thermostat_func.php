@@ -61,6 +61,22 @@
     return implode(', ', $data);
   }
   
+    //
+  //	calcul le nombre d'heure de chauffage sur la période indiquée
+  //
+  function getHeatTime ($date_debut, $date_fin) {
+    global $sqlite;
+    $past = strtotime($date_debut);
+	$present = strtotime($date_fin);
+	
+    $db = new SQLite3($sqlite);
+	$results = $db->query("SELECT round(count(timestamp)/60.0,2) as heattime FROM temp WHERE timestamp > $past AND timestamp < $present AND consigne > temp;");
+	$data = array();
+    $row = $results->fetchArray(SQLITE3_ASSOC);
+    $data[] = $row['heattime'];	
+    return implode(', ', $data); 
+  }
+  
   //
   // recupere la dernierre température pour faire du "temps réel"
   //
