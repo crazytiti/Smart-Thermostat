@@ -25,6 +25,8 @@ When the heater is on the thermostat run on li-ion (~100mA)
 
 The serveur folder contain basic/broken web code.
 The serveur/smart folder contain the full Open Element project
+You have to manualy add an index to dramatically improve performance:
+create index idx_timestamp on temp (timestamp);
 
 ![picture](https://raw.githubusercontent.com/crazytiti/Smart-Thermostat/master/sur%20mur.jpg)
 
